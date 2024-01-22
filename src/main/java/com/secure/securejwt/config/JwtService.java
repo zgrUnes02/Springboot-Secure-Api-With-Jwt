@@ -1,6 +1,7 @@
 package com.secure.securejwt.config;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -45,6 +46,20 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey() , SignatureAlgorithm.ES256)
                 .compact() ;
+    }
+
+    // Check if token is valid
+    public Boolean isTokenValid(String token , UserDetails userDetails) {
+        final String userEmail = extractUserEmail(token) ;
+        return ( userEmail.equals(userDetails.getUsername()) ) && !isTokenExpired(token) ;
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date()) ;
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token , Claims::getExpiration) ;
     }
 
     // Extract all claims
